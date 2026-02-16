@@ -31,3 +31,4 @@ export function exportToCsv(items: Static[]): string {
   ]);
   return [header.join(','), ...rows.map((r) => r.join(','))].join('\n');
 }
+// SpaApp update

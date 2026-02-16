@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+  const [isOpen, setIsOpen] = useState(false);
 import { Static, StaticFilter } from '../types/static';
 import { INITIAL_STATICS } from '../data/seed';
 import { loadPersisted, savePersisted } from '../utils/storage';

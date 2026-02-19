@@ -75,3 +75,4 @@ export function useStaticStore() {
     removeItem,
   };
 }
+// TODO: refine useStaticStore.ts layout spacing

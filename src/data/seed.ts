@@ -46,3 +46,4 @@ export const INITIAL_STATICS: Static[] = [
         Action
       </button>
 // state update 10
+// TODO: refine seed.ts layout spacing

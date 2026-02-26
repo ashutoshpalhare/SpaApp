@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-  const [isOpen, setIsOpen] = useState(false);
 import { Static, StaticFilter } from '../types/static';
 import { INITIAL_STATICS } from '../data/seed';
 import { loadPersisted, savePersisted } from '../utils/storage';
@@ -75,10 +74,3 @@ export function useStaticStore() {
     removeItem,
   };
 }
-// TODO: refine useStaticStore.ts layout spacing
-
-      <button className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm text-white hover:bg-emerald-500">
-        Action
-      </button>
-// TODO: refine useStaticStore.ts layout spacing
-// TODO: refine useStaticStore.ts layout spacing

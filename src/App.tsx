@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 import { ArrowDownRight, ArrowRight, CalendarDays, Check, Clock3, Flower2, Heart, Menu, Sparkles, X } from 'lucide-react';
 
 const services = [
@@ -20,7 +20,7 @@ export function App() {
   const [form, setForm] = useState({ name: '', email: '', date: '', time: '10:00', message: '' });
   const filtered = useMemo(() => services.filter(s => active === 'All' || s.category === active), [active]);
   const book = (name: string) => { setSelected(name); setSubmitted(false); document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth' }); };
-  function submit(e: React.FormEvent<HTMLFormElement>) { e.preventDefault(); setSubmitted(true); }
+  function submit(e: FormEvent<HTMLFormElement>) { e.preventDefault(); setSubmitted(true); }
 
   return <div className="site-shell">
     <div className="announcement"><span>YOUR MOMENT OF STILLNESS</span><span>Thoughtful care. Unhurried rituals.</span></div>

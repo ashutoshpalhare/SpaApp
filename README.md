@@ -1,27 +1,55 @@
-# SpaApp
+# SpaApp — A Premium Spa Website Concept
 
-Simple Static Website For Spa Services (inspired by codewithsadee/glowing)
+SpaApp is a responsive, public-facing spa website concept built with React, TypeScript, and Vite. The experience uses warm ivory, charcoal, and copper tones, editorial imagery, treatment discovery, and a booking-request form.
 
-> Reference inspiration: [codewithsadee/glowing](https://github.com/codewithsadee/glowing)
+> **Demo notice:** Service names, imagery, and INR prices are illustrative. The booking form validates fields in the browser only; it does not submit, persist, or confirm a real reservation. Connect a trusted booking backend before using this for a real business.
 
-## Key Features
+## Features
 
-- Category filtering and instant search
-- Summary metrics and status tracking
-- Clean data export and validation
-- Responsive dark-ready interface
-- Local persistence with automatic JSON state hydration
-- One-click CSV export for filtered statics
+- Responsive landing page and mobile navigation
+- Treatment cards with category filters
+- Service selection that carries into the booking request form
+- Browser-side required-field, email, and date validation
+- Accessible labels, focus states, and reduced-motion support
+- SEO title, description, theme color, and social preview metadata
+- Developer credit and source repository links
 
-## Getting Started
+## Tech stack
+
+- React 19 + TypeScript
+- Vite 6
+- Lucide React
+- Custom CSS with responsive breakpoints
+
+## Getting started
+
+Requires a current Node.js LTS release.
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Running Tests
+## Quality checks
 
 ```bash
+npm run build
 npm test
 ```
+
+The test command currently runs the repository's existing Vitest suite. Add tests for booking validation and filtering as the project evolves.
+
+## Before production
+
+1. Replace demo services, pricing, imagery, and copy with verified business information.
+2. Connect booking requests to a backend or booking provider and add server-side validation.
+3. Add privacy policy, terms, cancellation/refund policies, and real contact details.
+4. Verify image licensing, optimize/localize images, and configure analytics only with appropriate consent.
+5. Configure deployment and run build, tests, keyboard checks, and mobile QA.
+
+## Credits
+
+Designed and developed by [Ashutosh Palhare](https://ashutoshpalhare.github.io/).
+
+- [GitHub profile](https://github.com/ashutoshpalhare/)
+- [SpaApp repository](https://github.com/ashutoshpalhare/SpaApp)

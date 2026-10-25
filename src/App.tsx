@@ -1,321 +1,49 @@
-import React, { useState } from 'react';
-import {
-  LayoutDashboard,
-  Search,
-  Plus,
-  Download,
-  MoreHorizontal,
-  Circle,
-  Trash2,
-  Menu,
-  X,
-} from 'lucide-react';
-import { useStaticStore } from './hooks/useStaticStore';
-import { SummaryBar } from './components/SummaryBar';
-import { StaticCategory } from './types/static';
-import { exportToCsv } from './utils/storage';
+import { useMemo, useState } from 'react';
+import { ArrowDownRight, ArrowRight, CalendarDays, Check, Clock3, Flower2, Heart, Menu, Sparkles, X } from 'lucide-react';
 
-const CATEGORIES: (StaticCategory | 'All')[] = [
-  'All',
-  'Core',
-  'Operations',
-  'Growth',
-  'Archive',
+const services = [
+  { id: 'calm', category: 'Massage', name: 'Signature Calm Massage', time: '60 min', price: 1800, note: 'A slow, grounding full-body ritual designed to help you exhale.', image: 'photo-1540555700478-4be289fbecef' },
+  { id: 'deep', category: 'Massage', name: 'Deep Restore Therapy', time: '75 min', price: 2400, note: 'Focused pressure and considered techniques for tired muscles.', image: 'photo-1519823551278-64ac92734fb1' },
+  { id: 'glow', category: 'Skin', name: 'Botanical Glow Facial', time: '50 min', price: 1600, note: 'A gentle, plant-inspired facial for a fresh, dewy finish.', image: 'photo-1570172619644-dfd03ed5d881' },
+  { id: 'body', category: 'Body', name: 'Warm Stone Ritual', time: '80 min', price: 2800, note: 'Soothing warmth and mindful touch in one restorative escape.', image: 'photo-1544161515-4ab6ce6db874' },
+  { id: 'feet', category: 'Body', name: 'Rest & Renew Foot Ritual', time: '40 min', price: 1100, note: 'A little care for the part of you that carries you everywhere.', image: 'photo-1518611012118-696072aa579a' },
+  { id: 'duo', category: 'Rituals', name: 'Togetherness Retreat', time: '90 min', price: 5200, note: 'A shared moment of quiet, made for two.', image: 'photo-1515377905703-c4788e51af15' },
 ];
+const categories = ['All', 'Massage', 'Skin', 'Body', 'Rituals'];
+const money = (value: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value);
 
 export function App() {
-  const {
-    filteredItems,
-    filter,
-    setFilter,
-    summary,
-    addItem,
-    toggleStatus,
-    removeItem,
-  } = useStaticStore();
+  const [active, setActive] = useState('All');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [selected, setSelected] = useState('Signature Calm Massage');
+  const [submitted, setSubmitted] = useState(false);
+  const [form, setForm] = useState({ name: '', email: '', date: '', time: '10:00', message: '' });
+  const filtered = useMemo(() => services.filter(s => active === 'All' || s.category === active), [active]);
+  const book = (name: string) => { setSelected(name); setSubmitted(false); document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth' }); };
+  function submit(e: React.FormEvent<HTMLFormElement>) { e.preventDefault(); setSubmitted(true); }
 
-  const [title, setTitle] = useState('');
-  const [category, setCategory] = useState<StaticCategory>('Core');
-  const [metricValue, setMetricValue] = useState('25');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!title.trim()) return;
-    addItem({
-      title: title.trim(),
-      category,
-      status: 'active',
-      metricValue: Number(metricValue) || 0,
-    });
-    setTitle('');
-  }
-
-  function handleDownloadCsv() {
-    const csv = exportToCsv(filteredItems);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'spaapp-export.csv';
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  return (
-    <div className="flex min-h-screen bg-zinc-950 text-zinc-100">
-      {/* Sidebar */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-zinc-800/80 bg-zinc-950/95 backdrop-blur transition-transform duration-200 lg:static lg:translate-x-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className="flex h-16 items-center gap-3 border-b border-zinc-800/80 px-5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-sm font-bold text-white shadow-lg shadow-emerald-500/20">
-            G
-          </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold tracking-tight">SpaApp</p>
-            <p className="truncate text-[11px] text-zinc-500">Workspace</p>
-          </div>
-          <button
-            className="ml-auto rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-800 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        <nav className="flex-1 space-y-1 p-3">
-          <p className="px-3 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
-            Menu
-          </p>
-          <button className="flex w-full items-center gap-3 rounded-xl bg-emerald-500/10 px-3 py-2.5 text-sm font-medium text-emerald-300">
-            <LayoutDashboard className="h-4 w-4" />
-            Dashboard
-          </button>
-          {CATEGORIES.filter((c) => c !== 'All').map((cat) => (
-            <button
-              key={cat}
-              onClick={() => {
-                setFilter({ ...filter, category: cat });
-                setSidebarOpen(false);
-              }}
-              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${
-                filter.category === cat
-                  ? 'bg-zinc-800/80 text-zinc-100'
-                  : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'
-              }`}
-            >
-              <Circle className="h-3.5 w-3.5 opacity-60" />
-              {cat}
-            </button>
-          ))}
-        </nav>
-
-        <div className="border-t border-zinc-800/80 p-4">
-          <p className="text-[11px] text-zinc-500">Simple Static Website For Spa Services (inspired by codewithsadee/glowing)</p>
-        </div>
-      </aside>
-
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Main */}
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-zinc-800/80 bg-zinc-950/80 px-4 backdrop-blur md:px-6">
-          <button
-            className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-800 lg:hidden"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <Menu className="h-5 w-5" />
-          </button>
-          <div className="relative max-w-md flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-            <input
-              value={filter.query}
-              onChange={(e) => setFilter({ ...filter, query: e.target.value })}
-              placeholder="Search statics..."
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-900/80 py-2 pl-9 pr-3 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
-            />
-          </div>
-          <button
-            onClick={handleDownloadCsv}
-            className="inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 px-3.5 py-2 text-xs font-medium text-zinc-300 transition hover:border-zinc-700 hover:text-zinc-100"
-          >
-            <Download className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Export</span>
-          </button>
-        </header>
-
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-          <div className="mx-auto max-w-6xl">
-            <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">Dashboard</h1>
-                <p className="mt-1 text-sm text-zinc-500">
-                  Manage and track your statics
-                </p>
-              </div>
-            </div>
-
-            <SummaryBar
-              totalCount={summary.totalCount}
-              activeCount={summary.activeCount}
-              totalMetric={summary.totalMetric}
-            />
-
-            {/* Add form */}
-            <form
-              onSubmit={handleSubmit}
-              className="mb-6 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 md:p-5"
-            >
-              <div className="mb-3 flex items-center gap-2 text-sm font-medium text-zinc-300">
-                <Plus className="h-4 w-4 text-emerald-400" />
-                Add new static
-              </div>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                <input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Title..."
-                  className="lg:col-span-2 rounded-xl border border-zinc-800 bg-zinc-950/60 px-3.5 py-2.5 text-sm outline-none transition focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
-                />
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value as StaticCategory)}
-                  className="rounded-xl border border-zinc-800 bg-zinc-950/60 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500/50"
-                >
-                  {CATEGORIES.filter((c) => c !== 'All').map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="number"
-                  value={metricValue}
-                  onChange={(e) => setMetricValue(e.target.value)}
-                  placeholder="Value"
-                  className="rounded-xl border border-zinc-800 bg-zinc-950/60 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500/50"
-                />
-                <button
-                  type="submit"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-500"
-                >
-                  <Plus className="h-4 w-4" />
-                  Add
-                </button>
-              </div>
-            </form>
-
-            {/* Filters */}
-            <div className="mb-4 flex flex-wrap items-center gap-2">
-              {CATEGORIES.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setFilter({ ...filter, category: cat })}
-                  className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition ${
-                    filter.category === cat
-                      ? 'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/40'
-                      : 'bg-zinc-900 text-zinc-400 ring-1 ring-zinc-800 hover:text-zinc-200'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-
-            {/* List */}
-            {filteredItems.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-800 bg-zinc-900/20 px-6 py-16 text-center">
-                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-800/80 text-zinc-500">
-                  <LayoutDashboard className="h-5 w-5" />
-                </div>
-                <p className="text-sm font-medium text-zinc-300">No statics found</p>
-                <p className="mt-1 text-xs text-zinc-500">Try a different filter or add a new entry</p>
-              </div>
-            ) : (
-              <div className="overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-900/30">
-                <div className="hidden grid-cols-12 gap-4 border-b border-zinc-800/80 px-5 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500 sm:grid">
-                  <div className="col-span-5">Title</div>
-                  <div className="col-span-2">Category</div>
-                  <div className="col-span-2">Status</div>
-                  <div className="col-span-1 text-right">Value</div>
-                  <div className="col-span-2 text-right">Actions</div>
-                </div>
-                <ul className="divide-y divide-zinc-800/60">
-                  {filteredItems.map((item) => (
-                    <li
-                      key={item.id}
-                      className="grid grid-cols-1 items-center gap-3 px-5 py-4 transition hover:bg-zinc-900/50 sm:grid-cols-12 sm:gap-4"
-                    >
-                      <div className="sm:col-span-5">
-                        <p className="text-sm font-medium text-zinc-100">{item.title}</p>
-                        <p className="mt-0.5 text-xs text-zinc-500 sm:hidden">
-                          {item.category} · {item.status}
-                        </p>
-                      </div>
-                      <div className="hidden sm:col-span-2 sm:block">
-                        <span className="inline-flex rounded-lg bg-zinc-800/80 px-2 py-0.5 text-xs text-zinc-300">
-                          {item.category}
-                        </span>
-                      </div>
-                      <div className="hidden sm:col-span-2 sm:block">
-                        <span
-                          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                            item.status === 'active'
-                              ? 'bg-emerald-500/10 text-emerald-400'
-                              : item.status === 'paused'
-                                ? 'bg-amber-500/10 text-amber-400'
-                                : 'bg-zinc-700/50 text-zinc-400'
-                          }`}
-                        >
-                          <span
-                            className={`h-1.5 w-1.5 rounded-full ${
-                              item.status === 'active'
-                                ? 'bg-emerald-400'
-                                : item.status === 'paused'
-                                  ? 'bg-amber-400'
-                                  : 'bg-zinc-500'
-                            }`}
-                          />
-                          {item.status}
-                        </span>
-                      </div>
-                      <div className="hidden text-right font-mono text-sm text-zinc-200 sm:col-span-1 sm:block">
-                        {item.metricValue}
-                      </div>
-                      <div className="flex items-center justify-end gap-1 sm:col-span-2">
-                        <button
-                          onClick={() => toggleStatus(item.id)}
-                          className="rounded-lg px-2.5 py-1.5 text-xs text-zinc-400 transition hover:bg-zinc-800 hover:text-zinc-200"
-                          title="Toggle status"
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => removeItem(item.id)}
-                          className="rounded-lg px-2.5 py-1.5 text-xs text-zinc-500 transition hover:bg-rose-500/10 hover:text-rose-400"
-                          title="Delete"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </main>
-      </div>
-    </div>
-  );
+  return <div className="site-shell">
+    <div className="announcement"><span>YOUR MOMENT OF STILLNESS</span><span>Thoughtful care. Unhurried rituals.</span></div>
+    <header className="site-header">
+      <a className="brand" href="#home" aria-label="SpaApp home"><span className="brand-mark"><Flower2 size={24}/></span><span>spa<span className="brand-light">app</span><small>THE ART OF UNWINDING</small></span></a>
+      <button className="menu-toggle" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X/> : <Menu/>}</button>
+      <nav className={menuOpen ? 'nav-links open' : 'nav-links'} aria-label="Main navigation">
+        <a onClick={() => setMenuOpen(false)} href="#experience">The experience</a><a onClick={() => setMenuOpen(false)} href="#services">Treatments</a><a onClick={() => setMenuOpen(false)} href="#story">Our philosophy</a><a className="nav-cta" onClick={() => setMenuOpen(false)} href="#booking">Reserve a ritual <ArrowRight size={15}/></a>
+      </nav>
+    </header>
+    <main>
+      <section className="hero" id="home">
+        <img className="hero-image" src="https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&w=2200&q=85" alt="Quiet spa treatment room with warm natural textures" />
+        <div className="hero-overlay"/>
+        <div className="hero-content"><div className="eyebrow"><span/> A MORE MINDFUL KIND OF WELLNESS</div><h1>Come back<br/>to <em>yourself.</em></h1><p>A pause from the noise. A space to breathe. Thoughtfully crafted spa rituals that bring you back to what matters — you.</p><div className="hero-actions"><a className="button button-light" href="#services">Explore treatments <ArrowDownRight size={17}/></a><a className="text-link" href="#experience">Discover our approach <ArrowRight size={15}/></a></div><div className="hero-note"><Sparkles size={16}/><span>MAKE SPACE FOR HOW YOU WANT TO FEEL</span></div></div>
+        <div className="hero-side-note">REST IS NOT A REWARD. IT IS A RITUAL.</div>
+      </section>
+      <section className="intro section-wrap" id="experience"><div className="intro-label"><span>01</span> THE EXPERIENCE</div><div className="intro-copy"><h2>Wellness that feels<br/><em>like coming home.</em></h2><p>Not another thing to do. A moment to simply be. From the first breath to the final sip of herbal tea, every detail is considered, every treatment is personal, and your time is entirely your own.</p><a className="underlined-link" href="#story">The way we care <ArrowRight size={16}/></a></div><div className="intro-stamp"><Flower2 size={26}/><span>PAUSE<br/>BREATHE<br/>BEGIN AGAIN</span></div></section>
+      <section className="services-section" id="services"><div className="section-wrap"><div className="section-heading"><div><div className="intro-label"><span>02</span> YOUR RITUAL, YOUR WAY</div><h2>Find your kind<br/>of <em>stillness.</em></h2></div><p>Each treatment is an invitation to slow down. Choose what your body and mind are asking for today.</p></div><div className="filter-row" role="group" aria-label="Filter treatments">{categories.map(c => <button key={c} onClick={() => setActive(c)} className={active === c ? 'filter active' : 'filter'} aria-pressed={active === c}>{c}</button>)}</div><div className="service-grid">{filtered.map((s, i) => <article className="service-card" key={s.id}><div className="service-photo"><img loading="lazy" src={`https://images.unsplash.com/${s.image}?auto=format&fit=crop&w=900&q=80`} alt={s.name}/><span className="service-index">0{i + 1}</span><button className="service-arrow" aria-label={`Book ${s.name}`} onClick={() => book(s.name)}><ArrowDownRight size={19}/></button></div><div className="service-meta"><span>{s.category}</span><span><Clock3 size={13}/> {s.time}</span></div><h3>{s.name}</h3><p>{s.note}</p><div className="service-bottom"><strong>{money(s.price)}</strong><button onClick={() => book(s.name)}>Choose ritual <ArrowRight size={15}/></button></div></article>)}</div><p className="pricing-note">Illustrative treatments and prices for this demo. Final services and pricing should be confirmed by the spa.</p></div></section>
+      <section className="quote-section" id="story"><img src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1800&q=80" alt="Serene spa space with soft light" loading="lazy"/><div className="quote-shade"/><div className="quote-content"><Heart size={22}/><div className="eyebrow">A NOTE ON OUR PHILOSOPHY</div><h2>Care is not a luxury.<br/><em>It is how we return.</em></h2><p>We believe feeling well begins with being listened to. Our rituals are designed around a simple idea: your wellbeing deserves time, attention, and a little more gentleness.</p><a href="#booking" className="button button-light">Make time for you <ArrowRight size={16}/></a></div></section>
+      <section className="booking-section section-wrap" id="booking"><div className="booking-copy"><div className="intro-label"><span>03</span> YOUR TIME, RESERVED</div><h2>Let the outside<br/>world <em>wait.</em></h2><p>Tell us what you're looking for and when you'd like to visit. This demo form will validate your request locally; connect a booking service or backend before accepting real reservations.</p><div className="booking-detail"><CalendarDays size={19}/><div><strong>A little time for yourself</strong><span>Choose your preferred date and time below.</span></div></div></div><form className="booking-form" onSubmit={submit}><div className="form-top"><span>YOUR RESERVATION REQUEST</span><Flower2 size={21}/></div>{submitted ? <div className="success-state" role="status"><span className="success-icon"><Check size={22}/></span><h3>Request details validated.</h3><p>This is a frontend demo. Nothing has been sent or booked. Connect a backend to complete your reservation.</p><button className="button button-dark" type="button" onClick={() => setSubmitted(false)}>Edit request</button></div> : <><label>Choose your ritual<select value={selected} onChange={e => setSelected(e.target.value)}>{services.map(s => <option key={s.id}>{s.name}</option>)}</select></label><div className="form-grid"><label>Your name<input required minLength={2} autoComplete="name" placeholder="Name" value={form.name} onChange={e => setForm({...form, name:e.target.value})}/></label><label>Email address<input required type="email" autoComplete="email" placeholder="you@example.com" value={form.email} onChange={e => setForm({...form, email:e.target.value})}/></label><label>Preferred date<input required type="date" min={new Date().toISOString().slice(0,10)} value={form.date} onChange={e => setForm({...form, date:e.target.value})}/></label><label>Preferred time<select value={form.time} onChange={e => setForm({...form, time:e.target.value})}>{['10:00','11:30','13:00','14:30','16:00','17:30'].map(t => <option key={t}>{t}</option>)}</select></label></div><label>Anything we should know? <span className="optional">(optional)</span><textarea rows={3} placeholder="Your preferences or questions..." value={form.message} onChange={e => setForm({...form, message:e.target.value})}/></label><button type="submit" className="button button-dark full-button">Review my request <ArrowRight size={16}/></button><p className="form-disclaimer">Demo only · No personal information is transmitted or stored.</p></>}</form></section>
+      <section className="closing-banner"><span>YOUR NEXT EXHALE STARTS HERE</span><a href="#booking">Reserve a moment <ArrowRight size={16}/></a></section>
+    </main>
+    <footer className="site-footer"><div className="footer-main"><a className="brand footer-brand" href="#home"><span className="brand-mark"><Flower2 size={24}/></span><span>spa<span className="brand-light">app</span><small>THE ART OF UNWINDING</small></span></a><p>A quieter corner of your day.<br/>Come as you are. Leave a little lighter.</p><div className="footer-nav"><a href="#experience">Experience</a><a href="#services">Treatments</a><a href="#story">Our philosophy</a><a href="#booking">Booking requests</a></div></div><div className="footer-bottom"><span>© {new Date().getFullYear()} SpaApp · Concept website</span><span>Designed & developed by <a href="https://ashutoshpalhare.github.io/" target="_blank" rel="noreferrer">Ashutosh Palhare</a></span><a href="https://github.com/ashutoshpalhare/SpaApp" target="_blank" rel="noreferrer">View project <ArrowRight size={13}/></a></div></footer>
+  </div>;
 }
-
-export default App;

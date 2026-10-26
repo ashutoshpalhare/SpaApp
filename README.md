@@ -45,7 +45,11 @@ Vitest covers the INR currency formatter and validates the typed treatment catal
 2. Connect booking requests to a backend or booking provider and add server-side validation.
 3. Add privacy policy, terms, cancellation/refund policies, and real contact details.
 4. Verify image licensing, optimize/localize images, and configure analytics only with appropriate consent.
-5. Configure deployment and run build, tests, keyboard checks, and mobile QA.
+5. Configure GitHub Pages for GitHub Actions if it is not already enabled in repository settings, then run keyboard and mobile QA.
+
+## Deployment
+
+The `Deploy SpaApp to GitHub Pages` workflow builds and publishes the site from `main`. The Vite base path is configured for the repository URL. After the first successful deployment, the site should be available at `https://ashutoshpalhare.github.io/SpaApp/`.
 
 ## Credits
 

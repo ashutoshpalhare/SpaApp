@@ -37,7 +37,7 @@ npm run build
 npm test
 ```
 
-The test command currently runs the repository's existing Vitest suite. Add tests for booking validation and filtering as the project evolves.
+Vitest covers the INR currency formatter and validates the typed treatment catalogue. The GitHub Actions quality workflow runs the production build and test suite on pushes and pull requests to `main`.
 
 ## Before production
 
